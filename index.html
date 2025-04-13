@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Team Pairing App</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .hidden { display: none; }
+    .team-section, .final-teams, .pairing-screen { margin-top: 20px; }
+    .column { float: left; width: 45%; margin-right: 5%; }
+    .clearfix::after { content: ""; clear: both; display: table; }
+    input { display: block; margin-bottom: 10px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Step 1: Choose Number of Players</h2>
+  <select id="playerCount">
+    <option value="5">5</option>
+    <option value="6">6</option>
+  </select>
+  <button id="nextBtn" onclick="createPlayerInputs()">Next</button>
+
+  <div id="nameInputs" class="team-section hidden">
+    <div class="clearfix">
+      <div class="column">
+        <h3>Player Set 1</h3>
+        <div id="team1Inputs"></div>
+      </div>
+      <div class="column">
+        <h3>Player Set 2</h3>
+        <div id="team2Inputs"></div>
+      </div>
+    </div>
+    <button id="teamBtn" onclick="generateTeams()">Create Teams</button>
+  </div>
+
+  <div id="finalTeams" class="final-teams hidden">
+    <h3>Finalized Teams</h3>
+    <div class="clearfix">
+      <div class="column">
+        <h4>Team A</h4>
+        <ul id="teamA"></ul>
+      </div>
+      <div class="column">
+        <h4>Team B</h4>
+        <ul id="teamB"></ul>
+      </div>
+    </div>
+    <button id="pairBtn" onclick="generatePairs()">Next: Generate Pairs</button>
+  </div>
+
+  <div id="pairingScreen" class="pairing-screen hidden">
+    <h3>Team Pair Matchups</h3>
+    <div id="matchups"></div>
+  </div>
+
+  <script>
+    let playerCount;
+    let teamA = [], teamB = [];
+
+    function createPlayerInputs() {
+      playerCount = parseInt(document.getElementById("playerCount").value);
+      document.getElementById("nameInputs").classList.remove("hidden");
+
+      const team1Inputs = document.getElementById("team1Inputs");
+      const team2Inputs = document.getElementById("team2Inputs");
+      team1Inputs.innerHTML = '';
+      team2Inputs.innerHTML = '';
+
+      for (let i = 0; i < playerCount; i++) {
+        team1Inputs.innerHTML += `<input type="text" id="team1_player_${i}" placeholder="Player ${i + 1} Set 1">`;
+        team2Inputs.innerHTML += `<input type="text" id="team2_player_${i}" placeholder="Player ${i + 1} Set 2">`;
+      }
+      document.getElementById("nextBtn").disabled = true;
+    }
+
+    function generateTeams() {
+      teamA = [];
+      teamB = [];
+      for (let i = 0; i < playerCount; i++) {
+        const p1 = document.getElementById(`team1_player_${i}`).value.trim();
+        const p2 = document.getElementById(`team2_player_${i}`).value.trim();
+        if (Math.random() < 0.5) {
+          teamA.push(p1);
+          teamB.push(p2);
+        } else {
+          teamA.push(p2);
+          teamB.push(p1);
+        }
+      }
+
+      document.getElementById("finalTeams").classList.remove("hidden");
+      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p}</li>`).join('');
+      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p}</li>`).join('');
+      document.getElementById("teamBtn").disabled = true;
+    }
+
+    function generatePairs() {
+      const generateTeamPairs = (team) => {
+        const pairs = [];
+        for (let i = 0; i < team.length; i++) {
+          for (let j = i + 1; j < team.length; j++) {
+            pairs.push(`${team[i]} & ${team[j]}`);
+          }
+        }
+        return pairs;
+      };
+
+      const teamAPairs = generateTeamPairs(teamA);
+      const teamBPairs = generateTeamPairs(teamB);
+
+      // Shuffle arrays
+      teamAPairs.sort(() => Math.random() - 0.5);
+      teamBPairs.sort(() => Math.random() - 0.5);
+
+      const matchupCount = Math.min(teamAPairs.length, teamBPairs.length);
+      const matchupDiv = document.getElementById("matchups");
+      matchupDiv.innerHTML = '';
+      
+
+      for (let i = 0; i < matchupCount; i++) {
+        matchupDiv.innerHTML += `<p>${teamAPairs[i]} vs ${teamBPairs[i]}</p>`;
+      }
+
+      document.getElementById("pairingScreen").classList.remove("hidden");
+      document.getElementById("pairBtn").disabled = true;
+    }
+  </script>
+</body>
+</html>
